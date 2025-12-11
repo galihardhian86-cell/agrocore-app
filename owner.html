@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgroCore - Owner Dashboard (Online)</title>
+    <title>AgroCore - Owner Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { --primary: #0f172a; --accent: #10b981; --bg: #f1f5f9; --text: #334155; }
@@ -27,130 +27,112 @@
         <h2 style="margin-bottom: 40px;"><i class="fa-solid fa-building-wheat"></i> AgroCore</h2>
         <div style="padding:10px; background:rgba(255,255,255,0.1); border-radius:5px; margin-bottom:10px;"><i class="fa-solid fa-chart-pie"></i> Dashboard</div>
         <div style="padding:10px; opacity:0.7;"><i class="fa-solid fa-video"></i> CCTV</div>
-        <div style="padding:10px; opacity:0.7;"><i class="fa-solid fa-map"></i> Peta GPS</div>
     </div>
 
     <div class="main">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
-            <h2>Dashboard Real-Time (Cloud)</h2>
-            <div id="connection-status" class="loading">Menghubungkan ke Server...</div>
+            <h2>Dashboard Real-Time (NTFY Cloud)</h2>
+            <div id="connection-status" class="loading">Mencari Data...</div>
         </div>
 
         <div class="stat-grid">
             <div class="stat-box">
-                <div>
-                    <h4 style="color:gray; margin:0;">Laporan Masuk</h4>
-                    <h1 style="margin:5px 0;" id="total-laporan">0</h1>
-                </div>
+                <div><h4 style="color:gray; margin:0;">Laporan Masuk</h4><h1 style="margin:5px 0;" id="total-laporan">0</h1></div>
                 <i class="fa-solid fa-users fa-2x" style="color:var(--primary);"></i>
             </div>
             <div class="stat-box">
-                <div>
-                    <h4 style="color:gray; margin:0;">Total Tagihan Gaji</h4>
-                    <h1 style="margin:5px 0; color:#f59e0b;" id="total-gaji">Rp 0</h1>
-                </div>
+                <div><h4 style="color:gray; margin:0;">Total Tagihan</h4><h1 style="margin:5px 0; color:#f59e0b;" id="total-gaji">Rp 0</h1></div>
                 <i class="fa-solid fa-wallet fa-2x" style="color:#f59e0b;"></i>
             </div>
         </div>
 
         <div class="card">
-            <h3><i class="fa-solid fa-list"></i> Data Masuk dari Lapangan</h3>
-            <p style="color:gray; font-size:0.9em;">Data ini diambil langsung dari internet (Cross-Device).</p>
+            <h3><i class="fa-solid fa-list"></i> Data Masuk (Dari HP Buruh)</h3>
             <table>
-                <thead>
-                    <tr>
-                        <th>Waktu</th>
-                        <th>Nama Buruh</th>
-                        <th>Sektor</th>
-                        <th>Detail Aktivitas</th>
-                        <th>Gaji</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="table-body">
-                    </tbody>
+                <thead><tr><th>Waktu</th><th>Nama</th><th>Sektor</th><th>Aktivitas</th><th>Gaji</th><th>Status</th></tr></thead>
+                <tbody id="table-body"></tbody>
             </table>
-            <div id="empty-msg" style="text-align:center; padding:20px; color:gray;">Belum ada data masuk...</div>
+            <div id="empty-msg" style="text-align:center; padding:20px; color:gray;">Menunggu data dari server...</div>
         </div>
     </div>
 
     <script>
-        // === URL SERVER (HARUS SAMA PERSIS DENGAN BURUH) ===
-        // Kode ini mengambil data dari Cloud Dweet.io
-        const SERVER_URL = "https://dweet.io/get/dweets/for/agrocore-project-id-unik-9988";
+        // HARUS SAMA DENGAN BURUH
+        const TOPIC = "agrocore_project_galih_v2";
+        // Mengambil data 1 jam terakhir
+        const SERVER_URL = `https://ntfy.sh/${TOPIC}/json?poll=1&since=1h`; 
 
         function formatRupiah(num) {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
         }
 
-        let allReports = [];
+        let processedIds = []; // Supaya tidak duplikat
 
         function fetchData() {
             fetch(SERVER_URL)
-            .then(res => res.json())
-            .then(data => {
-                const dweets = data.with;
+            .then(res => res.text()) // Ambil teks karena formatnya JSON stream
+            .then(text => {
+                // ntfy mengembalikan beberapa baris JSON, kita pecah per baris
+                const lines = text.trim().split('\n');
                 
-                if (dweets && dweets.length > 0) {
-                    const status = document.getElementById('connection-status');
-                    status.innerText = "● Terhubung (Live)";
-                    status.style.color = "green";
-                    status.classList.remove('loading');
+                // Ambil elemen tabel
+                const tbody = document.getElementById('table-body');
+                const emptyMsg = document.getElementById('empty-msg');
+                const status = document.getElementById('connection-status');
+                
+                status.innerText = "● Terhubung (Live)";
+                status.style.color = "green";
+                status.classList.remove('loading');
 
-                    dweets.forEach(item => {
-                        const content = item.content;
-                        const exists = allReports.some(r => r.id === item.created);
-                        
-                        if(!exists) {
-                            allReports.unshift({
-                                id: item.created,
-                                name: content.name,
-                                sector: content.sector,
-                                summary: content.summary,
-                                wage: content.wage,
-                                time: content.time
-                            });
+                let totalCount = 0;
+                let totalMoney = 0;
+                
+                // Bersihkan tabel dulu untuk render ulang yang rapi
+                // (Dalam aplikasi asli bisa di-append, tapi ini biar simpel)
+                tbody.innerHTML = ''; 
+
+                // Loop dari bawah (terbaru) ke atas
+                lines.forEach(line => {
+                    if(!line) return;
+                    try {
+                        const msg = JSON.parse(line);
+                        // Cek apakah ini event message (bukan open/keepalive)
+                        if (msg.event === 'message') {
+                            const data = JSON.parse(msg.message); // Parse isi pesan
+                            
+                            totalCount++;
+                            totalMoney += data.wage;
+                            emptyMsg.style.display = 'none';
+
+                            const row = `
+                                <tr>
+                                    <td>${data.time}</td>
+                                    <td><b>${data.name}</b></td>
+                                    <td>${data.sector}</td>
+                                    <td>${data.summary}</td>
+                                    <td style="font-weight:bold;">${formatRupiah(data.wage)}</td>
+                                    <td><span class="badge">Diterima</span></td>
+                                </tr>
+                            `;
+                            // Masukkan ke paling atas
+                            tbody.insertAdjacentHTML('afterbegin', row);
                         }
-                    });
-                    
-                    renderTable();
+                    } catch (e) {
+                        console.log("Data skip (bukan JSON valid):", line);
+                    }
+                });
+
+                if(totalCount > 0) {
+                    document.getElementById('total-laporan').innerText = totalCount;
+                    document.getElementById('total-gaji').innerText = formatRupiah(totalMoney);
                 }
             })
             .catch(err => {
-                console.log("Menunggu data...");
+                console.log("Waiting...", err);
             });
         }
 
-        function renderTable() {
-            const tbody = document.getElementById('table-body');
-            const emptyMsg = document.getElementById('empty-msg');
-            
-            if(allReports.length > 0) {
-                emptyMsg.style.display = 'none';
-                tbody.innerHTML = '';
-                
-                let totalGaji = 0;
-
-                allReports.forEach(r => {
-                    totalGaji += r.wage;
-                    tbody.innerHTML += `
-                        <tr>
-                            <td>${r.time}</td>
-                            <td><b>${r.name}</b></td>
-                            <td>${r.sector}</td>
-                            <td>${r.summary}</td>
-                            <td style="font-weight:bold;">${formatRupiah(r.wage)}</td>
-                            <td><span class="badge">Diterima</span></td>
-                        </tr>
-                    `;
-                });
-
-                document.getElementById('total-laporan').innerText = allReports.length;
-                document.getElementById('total-gaji').innerText = formatRupiah(totalGaji);
-            }
-        }
-
-        // Cek data baru setiap 3 detik
+        // Cek data setiap 3 detik
         setInterval(fetchData, 3000);
         fetchData();
     </script>
