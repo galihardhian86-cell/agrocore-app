@@ -19,35 +19,25 @@
         .card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; }
         .card h3 { font-size: 1.1em; margin-bottom: 15px; color: var(--dark); display: flex; align-items: center; gap: 8px; }
         .weather-widget { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-        
-        /* KAMERA & ABSENSI */
         .face-scan-container { position: relative; width: 100%; height: 200px; background: #000; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; }
         #video-attendance { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
         .btn-absen { width: 100%; padding: 12px; background: var(--dark); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
         .btn-absen:disabled { background: #10b981; cursor: not-allowed; }
-        
-        /* LIST TUGAS */
         .task-list { display: grid; gap: 10px; }
         .task-item { border: 1px solid #f3f4f6; padding: 10px; border-radius: 8px; background: #fff; display:flex; justify-content: space-between; align-items: center;}
         .task-info { display: flex; flex-direction: column; }
         .task-name { font-weight: bold; color: var(--dark); font-size: 0.95em; }
         .task-price { font-size: 0.75em; color: var(--primary); background: #ecfdf5; padding: 2px 6px; border-radius: 10px; width: fit-content; margin-top:3px;}
         .btn-photo { background: var(--dark); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 0.8em; }
-        .proof-img { width: 35px; height: 35px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; }
-        
-        /* GAJI */
         .salary-card { background: var(--dark); color: white; text-align: center; position: sticky; top: 20px;}
         .salary-amount { font-size: 2.5em; font-weight: bold; color: var(--primary); margin: 10px 0; }
         .btn-kirim { background: #fff; color: var(--dark); font-weight: bold; padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; margin-top: 10px; width: 100%; }
-
-        /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 999; display: none; justify-content: center; align-items: center; flex-direction: column; }
         .camera-frame { position: relative; width: 90%; max-width: 400px; height: 300px; background: black; border-radius: 10px; overflow: hidden; border: 2px solid white; }
         #video-task { width: 100%; height: 100%; object-fit: cover; }
         .modal-controls { margin-top: 20px; display: flex; gap: 20px; }
         .btn-snap { width: 60px; height: 60px; border-radius: 50%; background: white; border: 5px solid #ccc; cursor: pointer; }
         .btn-close { color: white; background: none; border: none; text-decoration: underline; cursor: pointer; }
-        
         @media (max-width: 768px) { body { flex-direction: column; overflow: auto; } .sidebar { width: 100%; } .grid-container { grid-template-columns: 1fr; } .salary-card { position: static; } }
     </style>
 </head>
@@ -65,7 +55,7 @@
             </select>
         </div>
         <div class="nav-item"><i class="fa-solid fa-camera"></i> Aktivitas Harian</div>
-        <div style="margin-top:20px; font-size:0.8em; color:gray;">System: ONLINE (NTFY)</div>
+        <div style="margin-top:20px; font-size:0.8em; color:gray;">Server: agrocore_tugas_akhir_2025</div>
     </div>
 
     <div class="main-content">
@@ -108,13 +98,12 @@
     </div>
 
     <script>
-        // === SERVER CONFIG (JANGAN UBAH AGAR NYAMBUNG KE OWNER) ===
-        const SERVER_URL = "https://ntfy.sh/agrocore_final_project_v99";
+        // === SERVER CONFIG (WAJIB SAMA DENGAN OWNER) ===
+        const SERVER_URL = "https://ntfy.sh/agrocore_tugas_akhir_2025";
 
         let isAttended = false;
         let activeTaskType = ''; 
         let lastPhotoData = ""; 
-        
         let workData = { pollination: [], cutting: [], harvest: [], hoeing: [], pestcontrol: [], fertilizer: [] }; 
         const rates = { pollination: 20000, cutting: 30000, harvest: 50000, hoeing: 50000, pestcontrol: 25000, fertilizer: 30000, attendance: 5000, penalty: 10000 };
         const taskNames = { pollination: 'Penyerbukan', cutting: 'Cutting', harvest: 'Panen', hoeing: 'Mencangkul', pestcontrol: 'Pest Control', fertilizer: 'Pemupukan' };
@@ -127,7 +116,6 @@
             else predict.innerText = "Panen: 1 Bulan Lagi";
         }
 
-        // GENERATE LIST
         const listContainer = document.getElementById('task-list-container');
         for (const [key, value] of Object.entries(rates)) {
             if(key === 'attendance' || key === 'penalty') continue;
@@ -182,11 +170,15 @@
 
         function snapPhoto() {
             const canvas = document.createElement('canvas');
-            canvas.width = 150; canvas.height = 110; 
-            canvas.getContext('2d').drawImage(videoTask, 0, 0, canvas.width, canvas.height);
-            lastPhotoData = canvas.toDataURL('image/jpeg', 0.6); // Simpan untuk dikirim
+            // UKURAN DIPERKECIL AGAR MUAT DI SERVER GRATIS (PENTING!)
+            canvas.width = 100; 
+            canvas.height = 75;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(videoTask, 0, 0, canvas.width, canvas.height);
+            const imgUrl = canvas.toDataURL('image/jpeg', 0.5);
             
-            workData[activeTaskType].push(lastPhotoData);
+            lastPhotoData = imgUrl; 
+            workData[activeTaskType].push(imgUrl);
             document.getElementById(`cnt-${activeTaskType}`).innerText = workData[activeTaskType].length;
             
             closeCamera();
@@ -222,7 +214,7 @@
                 if(value.length > 0) taskSummary[key] = value.length;
             }
 
-            // KIRIM KE INTERNET (NTFY)
+            // KIRIM KE NTFY (ONLINE)
             fetch(SERVER_URL, {
                 method: 'POST',
                 body: JSON.stringify({
@@ -236,9 +228,9 @@
             })
             .then(response => {
                 if(response.ok) {
-                    alert(`✅ SUKSES! Laporan & Foto ${name} sudah terkirim ke Owner.`);
+                    alert(`✅ SUKSES! Data ${name} terkirim ke Laptop Owner.`);
                     location.reload();
-                } else { throw new Error("Gagal Server"); }
+                } else { throw new Error("Gagal"); }
             })
             .catch(err => {
                 alert("Gagal konek internet.");
