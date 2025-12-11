@@ -12,15 +12,12 @@
         .sidebar { width: 260px; background-color: var(--dark); color: white; display: flex; flex-direction: column; padding: 20px; flex-shrink: 0; overflow-y: auto; }
         .logo { font-size: 20px; font-weight: bold; margin-bottom: 30px; display: flex; align-items: center; gap: 10px; }
         .identity-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); }
-        .identity-box label { font-size: 0.75em; color: #9ca3af; display: block; margin-bottom: 5px; }
         .identity-input { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid #4b5563; color: white; padding: 8px; border-radius: 5px; margin-bottom: 10px; font-size: 0.9em; }
         .nav-item { padding: 12px; border-radius: 8px; background-color: rgba(255,255,255,0.1); color: var(--primary); border-left: 3px solid var(--primary); font-size: 0.9em; display: flex; align-items: center; gap: 10px; }
         .main-content { flex: 1; padding: 20px; overflow-y: auto; }
         .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; align-items: start; }
         .card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; }
         .card h3 { font-size: 1.1em; margin-bottom: 15px; color: var(--dark); display: flex; align-items: center; gap: 8px; }
-        
-        /* WIDGET CUACA */
         .weather-widget { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
         
         /* KAMERA & ABSENSI */
@@ -36,7 +33,6 @@
         .task-name { font-weight: bold; color: var(--dark); font-size: 0.95em; }
         .task-price { font-size: 0.75em; color: var(--primary); background: #ecfdf5; padding: 2px 6px; border-radius: 10px; width: fit-content; margin-top:3px;}
         .btn-photo { background: var(--dark); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 0.8em; }
-        .proof-gallery { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px; grid-column: span 2; }
         .proof-img { width: 35px; height: 35px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; }
         
         /* GAJI */
@@ -74,13 +70,8 @@
 
     <div class="main-content">
         <div class="weather-widget">
-            <div>
-                <h3 style="margin:0; font-size:1.2em;"><i class="fa-solid fa-cloud-sun"></i> Cuaca & Lahan</h3>
-                <small id="weather-desc">Cerah Berawan, 29°C</small>
-            </div>
-            <div style="text-align:right;">
-                <div style="font-weight:bold;" id="harvest-predict">Panen: 5 Hari Lagi</div>
-            </div>
+            <div><h3 style="margin:0; font-size:1.2em;"><i class="fa-solid fa-cloud-sun"></i> Cuaca & Lahan</h3><small id="weather-desc">Cerah Berawan, 29°C</small></div>
+            <div style="text-align:right;"><div style="font-weight:bold;" id="harvest-predict">Panen: 5 Hari Lagi</div></div>
         </div>
 
         <div class="grid-container">
@@ -109,7 +100,6 @@
     </div>
 
     <div class="modal-overlay" id="camera-modal">
-        <div style="color: white; margin-bottom: 10px;">Ambil Foto Bukti</div>
         <div class="camera-frame"><video id="video-task" playsinline></video></div>
         <div class="modal-controls">
             <button class="btn-close" onclick="closeCamera()">Batal</button>
@@ -118,24 +108,16 @@
     </div>
 
     <script>
-        // === SERVER CONFIG (SAMA DENGAN OWNER) ===
+        // === SERVER CONFIG (JANGAN UBAH AGAR NYAMBUNG KE OWNER) ===
         const SERVER_URL = "https://ntfy.sh/agrocore_final_project_v99";
 
         let isAttended = false;
         let activeTaskType = ''; 
-        let lastPhotoData = ""; // Menyimpan foto terakhir untuk dikirim
+        let lastPhotoData = ""; 
         
-        let workData = { 
-            pollination: [], cutting: [], harvest: [], hoeing: [], pestcontrol: [], fertilizer: [] 
-        }; 
-
-        const rates = { 
-            pollination: 20000, cutting: 30000, harvest: 50000, hoeing: 50000, pestcontrol: 25000, fertilizer: 30000, attendance: 5000, penalty: 10000 
-        };
-
-        const taskNames = {
-            pollination: 'Penyerbukan', cutting: 'Cutting', harvest: 'Panen', hoeing: 'Mencangkul', pestcontrol: 'Pest Control', fertilizer: 'Pemupukan'
-        };
+        let workData = { pollination: [], cutting: [], harvest: [], hoeing: [], pestcontrol: [], fertilizer: [] }; 
+        const rates = { pollination: 20000, cutting: 30000, harvest: 50000, hoeing: 50000, pestcontrol: 25000, fertilizer: 30000, attendance: 5000, penalty: 10000 };
+        const taskNames = { pollination: 'Penyerbukan', cutting: 'Cutting', harvest: 'Panen', hoeing: 'Mencangkul', pestcontrol: 'Pest Control', fertilizer: 'Pemupukan' };
 
         function updateSectorInfo() {
             const sector = document.getElementById('workerSector').value;
@@ -145,17 +127,14 @@
             else predict.innerText = "Panen: 1 Bulan Lagi";
         }
 
-        // GENERATE LIST TUGAS OTOMATIS
+        // GENERATE LIST
         const listContainer = document.getElementById('task-list-container');
         for (const [key, value] of Object.entries(rates)) {
             if(key === 'attendance' || key === 'penalty') continue;
             listContainer.innerHTML += `
-                <div class="task-container">
-                    <div class="task-item">
-                        <div class="task-info"><span class="task-name">${taskNames[key]}</span><span class="task-price">Rp ${value/1000}rb</span></div>
-                        <button class="btn-photo" onclick="openCamera('${key}')"><i class="fa-solid fa-camera"></i> Bukti <b id="cnt-${key}">0</b></button>
-                    </div>
-                    <div class="proof-gallery" id="gallery-${key}"></div>
+                <div class="task-item">
+                    <div class="task-info"><span class="task-name">${taskNames[key]}</span><span class="task-price">Rp ${value/1000}rb</span></div>
+                    <button class="btn-photo" onclick="openCamera('${key}')"><i class="fa-solid fa-camera"></i> Bukti <b id="cnt-${key}">0</b></button>
                 </div>
             `;
         }
@@ -203,16 +182,11 @@
 
         function snapPhoto() {
             const canvas = document.createElement('canvas');
-            canvas.width = 150; canvas.height = 110; // Resize kecil agar muat di internet
+            canvas.width = 150; canvas.height = 110; 
             canvas.getContext('2d').drawImage(videoTask, 0, 0, canvas.width, canvas.height);
-            const imgUrl = canvas.toDataURL('image/jpeg', 0.6);
-            lastPhotoData = imgUrl; // Simpan untuk dikirim
-
-            workData[activeTaskType].push(imgUrl);
+            lastPhotoData = canvas.toDataURL('image/jpeg', 0.6); // Simpan untuk dikirim
             
-            const imgElem = document.createElement('img');
-            imgElem.src = imgUrl; imgElem.className = 'proof-img';
-            document.getElementById(`gallery-${activeTaskType}`).appendChild(imgElem);
+            workData[activeTaskType].push(lastPhotoData);
             document.getElementById(`cnt-${activeTaskType}`).innerText = workData[activeTaskType].length;
             
             closeCamera();
@@ -233,8 +207,8 @@
             const name = document.getElementById('workerName').value;
             const sector = document.getElementById('workerSector').value;
             const wage = calcWage();
-            if(!name) { alert("⚠️ Nama Buruh WAJIB diisi!"); return; }
             
+            if(!name) { alert("⚠️ Nama Buruh WAJIB diisi!"); return; }
             let totalActivity = 0;
             for (const arr of Object.values(workData)) totalActivity += arr.length;
             if(totalActivity === 0 && !isAttended) { alert("⚠️ Belum ada aktivitas!"); return; }
@@ -248,21 +222,21 @@
                 if(value.length > 0) taskSummary[key] = value.length;
             }
 
-            // MENGIRIM KE INTERNET (BUKAN LOCALSTORAGE)
+            // KIRIM KE INTERNET (NTFY)
             fetch(SERVER_URL, {
                 method: 'POST',
                 body: JSON.stringify({
                     name: name,
                     sector: sector,
-                    tasks: taskSummary,
-                    image: lastPhotoData, // Foto terakhir dikirim
+                    summary: JSON.stringify(taskSummary).replace(/[{"}]/g, '').replace(/,/g, ', '),
+                    image: lastPhotoData, 
                     wage: wage,
                     time: new Date().toLocaleTimeString()
                 })
             })
             .then(response => {
                 if(response.ok) {
-                    alert(`✅ SUKSES! Laporan & Foto terkirim ke Owner.`);
+                    alert(`✅ SUKSES! Laporan & Foto ${name} sudah terkirim ke Owner.`);
                     location.reload();
                 } else { throw new Error("Gagal Server"); }
             })
