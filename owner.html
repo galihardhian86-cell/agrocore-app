@@ -6,6 +6,7 @@
     <title>AgroCore - Owner Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* CSS RETAINED FROM YOUR CODE + UPDATES */
         :root { --primary: #0f172a; --accent: #10b981; --bg: #f1f5f9; --white: #ffffff; --text: #334155; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: var(--bg); display: flex; height: 100vh; overflow: hidden; color: var(--text); }
@@ -29,24 +30,21 @@
         .cctv-frame { background: black; height: 280px; border-radius: 10px; position: relative; overflow: hidden; border: 2px solid #333; }
         .cctv-frame img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; transition: 0.5s; }
         .cctv-frame:hover img { opacity: 1; transform: scale(1.05); }
-        .cctv-overlay { position: absolute; top: 15px; left: 15px; color: white; background: red; padding: 3px 10px; border-radius: 4px; font-size: 0.8em; animation: blink 1.5s infinite; z-index: 10; font-weight: bold; box-shadow: 0 0 5px red; }
+        .cctv-overlay { position: absolute; top: 15px; left: 15px; color: white; background: red; padding: 3px 10px; border-radius: 4px; font-size: 0.8em; animation: blink 1.5s infinite; z-index: 10; font-weight: bold; }
         .cctv-label { position: absolute; bottom: 15px; left: 15px; color: #0f0; font-family: monospace; background: rgba(0,0,0,0.7); padding: 2px 5px; font-size: 0.9em; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 100; }
-        .modal-content { background: white; width: 500px; max-height: 90vh; overflow-y: auto; border-radius: 15px; padding: 25px; animation: slideUp 0.3s; text-align: center; }
-        #proof-img { width: 100%; border-radius: 8px; border: 2px solid #eee; margin-top: 10px; }
-        .badge { padding: 5px 10px; border-radius: 15px; font-size: 0.8em; font-weight: bold; background: #dcfce7; color: #166534; }
-        .bg-pending { background: #fef3c7; color: #b45309; }
-        .bg-paid { background: #dcfce7; color: #166534; }
-        .btn-view { background: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.9em; }
         .map-container { position: relative; height: 400px; background-color: #e5e7eb; border-radius: 12px; overflow: hidden; background-image: radial-gradient(#9ca3af 1px, transparent 1px); background-size: 20px 20px; }
         .sector-zone { position: absolute; border: 2px dashed rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 2em; color: rgba(0,0,0,0.1); }
         .worker-dot { position: absolute; width: 40px; height: 40px; background: var(--accent); border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2em; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: 0.5s; z-index: 10; cursor: pointer; }
         .worker-dot:hover::after { content: attr(data-name); position: absolute; top: -30px; background: #333; color: white; padding: 5px; border-radius: 5px; font-size: 0.8em; white-space: nowrap; }
-        .loading { color: green; font-weight: bold; animation: blink 1s infinite; font-size: 0.9em; margin-right: 10px;}
         
-        /* TOMBOL HAPUS BARU */
-        .btn-clear { background: #ef4444; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.8em; margin-left: 10px; }
-        .btn-clear:hover { background: #dc2626; }
+        /* NEW BUTTON STYLES */
+        .btn-view { background: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.9em; }
+        .btn-clear { background: #ef4444; color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.8em; margin-left: 10px; }
+        
+        /* MODAL FOTO */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 100; }
+        .modal-content { background: white; width: 500px; max-height: 90vh; overflow-y: auto; border-radius: 15px; padding: 25px; animation: slideUp 0.3s; text-align:center; }
+        #proof-img { width: 100%; border-radius: 8px; border: 1px solid #ddd; margin-top: 10px; image-rendering: pixelated; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes blink { 50% { opacity: 0.5; } }
@@ -67,8 +65,10 @@
         <div class="top-bar">
             <h2 id="page-title">Dashboard Perkebunan</h2>
             <div style="text-align: right; display:flex; align-items:center;">
-                <span id="connection-status" class="loading">● Menghubungkan...</span>
-                <div style="font-weight: bold;">Pemilik: Bpk. Wijaya</div>
+                <span id="connection-status" style="color:green; font-weight:bold; margin-right:15px; font-size:0.9em;">● Menghubungkan...</span>
+                <div>
+                    <div style="font-weight: bold;">Pemilik: Bpk. Wijaya</div>
+                </div>
             </div>
         </div>
 
@@ -91,11 +91,10 @@
             <div class="table-card">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h3>Laporan Aktivitas Harian (Real-time Cloud)</h3>
-                    <button class="btn-clear" onclick="clearHistory()"><i class="fa-solid fa-trash"></i> Hapus Riwayat</button>
+                    <button class="btn-clear" onclick="clearHistory()"><i class="fa-solid fa-trash"></i> Clear History</button>
                 </div>
-                
                 <table style="width:100%">
-                    <thead><tr><th>Waktu</th><th>Nama</th><th>Sektor</th><th>Detail Pekerjaan</th><th>Upah</th><th>Bukti Foto</th></tr></thead>
+                    <thead><tr><th>Waktu</th><th>Nama</th><th>Sektor</th><th>Detail Pekerjaan</th><th>Upah</th><th>Bukti</th></tr></thead>
                     <tbody id="live-table-body"></tbody>
                 </table>
                 <p id="empty-msg" style="text-align:center; color:gray; padding:20px;">Menunggu data dari Buruh...</p>
@@ -168,14 +167,14 @@
     </div>
 
     <script>
-        // === SERVER CONFIG ===
-        const SERVER_URL = "https://ntfy.sh/agrocore_final_fix_v100/json?poll=1&since=1h";
+        // === SERVER CONFIG (SAMA DENGAN BURUH) ===
+        const SERVER_URL = "https://ntfy.sh/agrocore_final_prod_88/json?poll=1&since=all";
 
         function formatRupiah(num) {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
         }
 
-        // Ambil waktu reset terakhir dari memori (agar history lama tidak muncul)
+        // Logic Clear History
         let lastClearTime = localStorage.getItem('lastClearTime') || 0;
         let allReports = [];
 
@@ -202,7 +201,7 @@
                     if(!line) return;
                     try {
                         const msg = JSON.parse(line);
-                        // FILTER: Hanya ambil data yang lebih baru dari waktu "Hapus Riwayat"
+                        // Filter data berdasarkan waktu clear history
                         if (msg.event === 'message' && msg.time > lastClearTime) {
                             const data = JSON.parse(msg.message);
                             allReports.unshift(data); 
@@ -217,27 +216,20 @@
 
                     allReports.forEach((data, index) => {
                         // 1. ISI TABEL DASHBOARD
-                        tbody.innerHTML += `
+                        const row = `
                             <tr>
                                 <td>${data.time}</td>
                                 <td><b>${data.name}</b></td>
                                 <td>${data.sector}</td>
                                 <td>${data.summary}</td>
                                 <td style="font-weight:bold;">${formatRupiah(data.wage)}</td>
-                                <td><button class="btn-view" onclick="showProof(${index})"><i class="fa-solid fa-eye"></i> Cek Foto</button></td>
+                                <td><button class="btn-view" onclick="showProof(${index})"><i class="fa-solid fa-eye"></i> Cek Bukti</button></td>
                             </tr>
                         `;
-                        
-                        // 2. ISI TABEL HISTORY
-                        tbodyHistory.innerHTML += `
-                            <tr>
-                                <td>${data.time}</td>
-                                <td>${data.name}</td>
-                                <td>${data.summary}</td>
-                                <td>${formatRupiah(data.wage)}</td>
-                            </tr>`;
+                        tbody.innerHTML += row;
+                        tbodyHistory.innerHTML += row;
 
-                        // 3. ISI PETA GPS
+                        // 2. ISI MAP
                         let top = '50%', left = '50%'; 
                         const rand = () => Math.floor(Math.random() * 20) - 10; 
                         if(data.sector === "Sektor A") { top = (40 + rand()) + '%'; left = (20 + rand()) + '%'; }
@@ -259,20 +251,7 @@
             .catch(err => { console.log("Waiting data..."); });
         }
 
-        // FUNGSI UNTUK HAPUS RIWAYAT (RESET)
-        function clearHistory() {
-            if(confirm("Yakin ingin menghapus semua riwayat laporan dari tampilan ini?")) {
-                // Set waktu "pemblokiran" ke detik ini
-                lastClearTime = Math.floor(Date.now() / 1000);
-                localStorage.setItem('lastClearTime', lastClearTime);
-                
-                // Refresh data
-                fetchData();
-                alert("Riwayat dibersihkan.");
-            }
-        }
-
-        // FUNGSI LIHAT FOTO
+        // FUNGSI TAMPILKAN FOTO DI MODAL
         function showProof(index) {
             const data = allReports[index];
             document.getElementById('proof-name').innerText = "Bukti Kerja: " + data.name;
@@ -288,6 +267,15 @@
             document.getElementById('modal-proof').style.display = 'flex';
         }
 
+        // FUNGSI CLEAR HISTORY
+        function clearHistory() {
+            if(confirm("Hapus semua riwayat laporan dari tampilan ini?")) {
+                lastClearTime = Math.floor(Date.now() / 1000);
+                localStorage.setItem('lastClearTime', lastClearTime);
+                fetchData(); // Refresh tampilan
+            }
+        }
+
         function showPage(pageId, element) {
             document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
@@ -296,8 +284,7 @@
             document.getElementById('page-title').innerText = titles[pageId];
         }
 
-        // Cek data setiap 2 detik
-        setInterval(fetchData, 2000);
+        setInterval(fetchData, 3000); // Cek data tiap 3 detik
         fetchData();
     </script>
 </body>
