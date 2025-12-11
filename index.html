@@ -9,128 +9,240 @@
         :root { --primary: #10b981; --dark: #1f2937; --light: #f3f4f6; --card-bg: #ffffff; --text-main: #374151; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background-color: var(--light); color: var(--text-main); height: 100vh; display: flex; overflow: hidden; }
+        
+        /* SIDEBAR */
         .sidebar { width: 260px; background-color: var(--dark); color: white; display: flex; flex-direction: column; padding: 20px; flex-shrink: 0; }
         .logo { font-size: 20px; font-weight: bold; margin-bottom: 30px; display: flex; align-items: center; gap: 10px; }
         .identity-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); }
-        .identity-input { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid #4b5563; color: white; padding: 8px; border-radius: 5px; margin-bottom: 10px; }
+        .identity-input { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid #4b5563; color: white; padding: 8px; border-radius: 5px; margin-bottom: 10px; font-size: 0.9em; }
+        .nav-item { padding: 12px; border-radius: 8px; background-color: rgba(255,255,255,0.1); color: var(--primary); border-left: 3px solid var(--primary); font-size: 0.9em; display: flex; align-items: center; gap: 10px; }
+        
+        /* MAIN CONTENT */
         .main-content { flex: 1; padding: 20px; overflow-y: auto; }
-        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #e5e7eb; }
-        .task-item { border: 1px solid #f3f4f6; padding: 10px; border-radius: 8px; margin-bottom: 10px; display:flex; justify-content: space-between; align-items: center; }
-        .btn-photo { background: var(--dark); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
-        .salary-amount { font-size: 2.5em; font-weight: bold; color: var(--primary); text-align: center; margin: 10px 0; }
-        .btn-kirim { background: var(--primary); color: white; font-weight: bold; padding: 15px 20px; border-radius: 6px; border: none; cursor: pointer; width: 100%; font-size: 1.1em; }
-        .btn-kirim:disabled { background: #ccc; cursor: not-allowed; }
-        .proof-count { background: red; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.8em; margin-left: 5px; display: none; }
-        @media (max-width: 768px) { body { flex-direction: column; overflow: auto; } .sidebar { width: 100%; } }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; align-items: start; }
+        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; }
+        .card h3 { font-size: 1.1em; margin-bottom: 15px; color: var(--dark); display: flex; align-items: center; gap: 8px; }
+
+        /* FITUR KAMERA */
+        .face-scan-container { position: relative; width: 100%; height: 200px; background: #000; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; }
+        #video-attendance { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        .btn-absen { width: 100%; padding: 12px; background: var(--dark); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .btn-absen:disabled { background: #10b981; cursor: not-allowed; }
+
+        /* LIST PEKERJAAN */
+        .task-item { border: 1px solid #f3f4f6; padding: 10px; border-radius: 8px; margin-bottom: 10px; display:flex; justify-content: space-between; align-items: center; background:white; }
+        .task-name { font-weight: bold; color: var(--dark); font-size: 0.9em; }
+        .task-price { font-size: 0.75em; color: var(--primary); background: #ecfdf5; padding: 2px 8px; border-radius: 10px; }
+        .btn-photo { background: var(--dark); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 0.8em; }
+        .proof-gallery { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px; }
+        .proof-img { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; }
+
+        /* MODAL KAMERA POPUP */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 999; display: none; justify-content: center; align-items: center; flex-direction: column; }
+        .camera-frame { position: relative; width: 90%; max-width: 400px; height: 300px; background: black; border-radius: 10px; overflow: hidden; border: 2px solid white; }
+        #video-task { width: 100%; height: 100%; object-fit: cover; }
+        .modal-controls { margin-top: 20px; display: flex; gap: 20px; }
+        .btn-snap { width: 60px; height: 60px; border-radius: 50%; background: white; border: 5px solid #ccc; cursor: pointer; }
+        .btn-close { color: white; background: none; border: none; text-decoration: underline; cursor: pointer; font-size:1.1em; }
+
+        /* GAJI */
+        .salary-card { background: var(--dark); color: white; text-align: center; margin-top: 20px; }
+        .salary-amount { font-size: 2.5em; font-weight: bold; color: var(--primary); margin: 10px 0; }
+        .btn-kirim { background: var(--primary); color: white; font-weight: bold; padding: 15px; border-radius: 6px; border: none; cursor: pointer; width: 100%; font-size: 1.1em; }
+        
+        @media (max-width: 768px) { body { flex-direction: column; overflow: auto; } .sidebar { width: 100%; } .grid-container { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
+
     <div class="sidebar">
         <div class="logo"><i class="fa-solid fa-satellite-dish"></i> AgroCore Online</div>
         <div class="identity-box">
-            <label style="color:#aaa; font-size:0.8em;">Nama Buruh:</label>
+            <label style="color:#aaa;">Nama Buruh:</label>
             <input type="text" id="workerName" class="identity-input" placeholder="Wajib diisi..." value="">
-            <label style="color:#aaa; font-size:0.8em;">Sektor:</label>
+            <label style="color:#aaa;">Sektor:</label>
             <select id="workerSector" class="identity-input">
                 <option value="Sektor A">Sektor A</option>
                 <option value="Sektor B">Sektor B</option>
                 <option value="Sektor C">Sektor C</option>
             </select>
         </div>
-        <div style="padding:10px; background:rgba(255,255,255,0.1); border-radius:5px;"><i class="fa-solid fa-signal"></i> Server: NTFY</div>
+        <div style="padding:10px; background:rgba(255,255,255,0.1); border-radius:5px;"><i class="fa-solid fa-wifi"></i> Status: ONLINE</div>
     </div>
 
     <div class="main-content">
-        <div class="card">
-            <h3><i class="fa-solid fa-list-check"></i> Input Pekerjaan</h3>
-            <p style="color:gray; font-size:0.9em; margin-bottom:15px;">Klik tombol kamera untuk menambah hitungan.</p>
+        <div class="grid-container">
             
-            <div id="task-list">
-                <div class="task-item">
-                    <div><b>Panen</b> <span style="font-size:0.8em; color:green;">(50rb)</span></div>
-                    <button class="btn-photo" onclick="addCount('harvest')"><i class="fa-solid fa-camera"></i> <span id="cnt-harvest" class="proof-count">0</span> +</button>
+            <div class="card">
+                <h3><i class="fa-solid fa-user-check"></i> 1. Absensi Wajib</h3>
+                <div class="face-scan-container">
+                    <video id="video-attendance" playsinline></video>
+                    <i id="att-icon" class="fa-solid fa-face-smile fa-3x" style="color: #555; position: absolute;"></i>
                 </div>
-                <div class="task-item">
-                    <div><b>Cutting</b> <span style="font-size:0.8em; color:green;">(30rb)</span></div>
-                    <button class="btn-photo" onclick="addCount('cutting')"><i class="fa-solid fa-camera"></i> <span id="cnt-cutting" class="proof-count">0</span> +</button>
-                </div>
-                <div class="task-item">
-                    <div><b>Mencangkul</b> <span style="font-size:0.8em; color:green;">(50rb)</span></div>
-                    <button class="btn-photo" onclick="addCount('hoeing')"><i class="fa-solid fa-camera"></i> <span id="cnt-hoeing" class="proof-count">0</span> +</button>
-                </div>
-                 <div class="task-item">
-                    <div><b>Pemupukan</b> <span style="font-size:0.8em; color:green;">(30rb)</span></div>
-                    <button class="btn-photo" onclick="addCount('fertilizer')"><i class="fa-solid fa-camera"></i> <span id="cnt-fertilizer" class="proof-count">0</span> +</button>
-                </div>
+                <button id="btn-absen" class="btn-absen" onclick="startAttendance()">Mulai Absen Masuk</button>
+                <div id="att-status" style="text-align:center; margin-top:10px; color:red;">Belum Absen (-Rp 10.000)</div>
             </div>
+
+            <div class="card">
+                <h3><i class="fa-solid fa-camera"></i> 2. Foto Bukti Pekerjaan</h3>
+                <p style="font-size:0.8em; color:gray; margin-bottom:10px;">Ambil foto untuk setiap item pekerjaan.</p>
+
+                <div id="activity-list"></div> </div>
         </div>
 
-        <div class="card" style="background: #1f2937; color: white;">
-            <h3 style="color:white; text-align:center;">Estimasi Pendapatan</h3>
-            <div class="salary-amount" id="total-wage">Rp 0</div>
+        <div class="card salary-card">
+            <h3>Estimasi Pendapatan</h3>
+            <div class="salary-amount" id="total-wage">Rp -10.000</div>
             <button id="btn-submit" class="btn-kirim" onclick="sendOnline()">
                 <i class="fa-solid fa-paper-plane"></i> KIRIM LAPORAN
             </button>
         </div>
     </div>
 
-    <script>
-        // === SERVER BARU (NTFY) - LEBIH STABIL DI HP INDONESIA ===
-        // Ganti 'agrocore_project_galih_v2' jika ingin channel unik sendiri
-        const TOPIC = "agrocore_project_galih_v2";
-        const SERVER_URL = `https://ntfy.sh/${TOPIC}`;
-        
-        let tasks = { harvest: 0, cutting: 0, hoeing: 0, fertilizer: 0 };
-        const rates = { harvest: 50000, cutting: 30000, hoeing: 50000, fertilizer: 30000 };
+    <div class="modal-overlay" id="camera-modal">
+        <div style="color: white; margin-bottom: 15px; font-weight:bold;">Ambil Foto Bukti</div>
+        <div class="camera-frame"><video id="video-task" playsinline></video></div>
+        <div class="modal-controls">
+            <button class="btn-close" onclick="closeCamera()">Batal</button>
+            <button class="btn-snap" onclick="snapPhoto()"></button>
+        </div>
+    </div>
 
-        function addCount(type) {
-            tasks[type]++;
-            const badge = document.getElementById(`cnt-${type}`);
-            badge.innerText = tasks[type];
-            badge.style.display = 'inline-block';
+    <script>
+        // === CONFIG SERVER (NTFY) ===
+        const SERVER_URL = "https://ntfy.sh/agrocore_project_galih_v2";
+
+        // DATA AKTIVITAS
+        const activities = [
+            { id: 'harvest', name: 'Panen', price: 50000 },
+            { id: 'cutting', name: 'Cutting', price: 30000 },
+            { id: 'hoeing', name: 'Mencangkul', price: 50000 },
+            { id: 'pest', name: 'Pest Control', price: 25000 },
+            { id: 'fertilizer', name: 'Pemupukan', price: 30000 }
+        ];
+
+        let workData = { harvest: 0, cutting: 0, hoeing: 0, pest: 0, fertilizer: 0 };
+        let isAttended = false;
+        let activeTaskType = '';
+        let taskStream = null;
+
+        // 1. RENDER LIST AKTIVITAS
+        const listContainer = document.getElementById('activity-list');
+        activities.forEach(act => {
+            listContainer.innerHTML += `
+                <div class="task-item">
+                    <div>
+                        <div class="task-name">${act.name}</div>
+                        <span class="task-price">Rp ${act.price/1000}rb / Foto</span>
+                    </div>
+                    <button class="btn-photo" onclick="openCamera('${act.id}')">
+                        <i class="fa-solid fa-camera"></i> Bukti: <b id="count-${act.id}">0</b>
+                    </button>
+                </div>
+            `;
+        });
+
+        // 2. LOGIC ABSENSI
+        async function startAttendance() {
+            const name = document.getElementById('workerName').value;
+            if(!name) return alert("⚠️ Isi Nama Buruh dulu!");
+            if(isAttended) return;
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const video = document.getElementById('video-attendance');
+                video.srcObject = stream;
+                video.play();
+                document.getElementById('att-icon').style.display = 'none';
+                document.getElementById('btn-absen').innerText = "Memindai...";
+
+                setTimeout(() => {
+                    stream.getTracks().forEach(t => t.stop());
+                    isAttended = true;
+                    document.getElementById('att-status').innerHTML = '<span style="color:green;">TERVERIFIKASI (+Rp 5.000)</span>';
+                    document.getElementById('btn-absen').innerText = "Absensi Sukses";
+                    document.getElementById('btn-absen').disabled = true;
+                    calcWage();
+                }, 1500);
+            } catch (err) { alert("Kamera Error: " + err); }
+        }
+
+        // 3. LOGIC KAMERA TUGAS
+        const modal = document.getElementById('camera-modal');
+        const videoTask = document.getElementById('video-task');
+
+        async function openCamera(type) {
+            activeTaskType = type;
+            modal.style.display = 'flex';
+            try {
+                taskStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                videoTask.srcObject = taskStream;
+                videoTask.play();
+            } catch (err) { alert("Gagal buka kamera: " + err); closeModal(); }
+        }
+
+        function closeCamera() {
+            modal.style.display = 'none';
+            if(taskStream) taskStream.getTracks().forEach(t => t.stop());
+        }
+
+        function snapPhoto() {
+            // Simulasi foto (menambah hitungan)
+            workData[activeTaskType]++;
+            document.getElementById(`count-${activeTaskType}`).innerText = workData[activeTaskType];
+            closeCamera();
             calcWage();
         }
 
+        // 4. HITUNG GAJI
         function calcWage() {
             let total = 0;
-            for(let key in tasks) total += tasks[key] * rates[key];
+            activities.forEach(act => {
+                total += workData[act.id] * act.price;
+            });
+            if (isAttended) total += 5000; else total -= 10000;
             document.getElementById('total-wage').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(total);
             return total;
         }
 
+        // 5. KIRIM DATA (ONLINE)
         function sendOnline() {
             const name = document.getElementById('workerName').value;
             const sector = document.getElementById('workerSector').value;
             const wage = calcWage();
 
-            if(!name) return alert("⚠️ Isi Nama Buruh dulu!");
-            if(wage === 0) return alert("⚠️ Belum ada pekerjaan!");
-
+            if(!name) return alert("⚠️ Isi Nama Buruh!");
+            
             const btn = document.getElementById('btn-submit');
             btn.innerHTML = "Mengirim...";
             btn.disabled = true;
 
-            // KIRIM KE SERVER NTFY (Biasanya tidak diblokir)
+            // Membuat ringkasan teks
+            let summary = [];
+            activities.forEach(act => {
+                if(workData[act.id] > 0) summary.push(`${act.name}: ${workData[act.id]}`);
+            });
+            let summaryText = summary.join(", ");
+            if(summaryText === "") summaryText = "Hanya Absen";
+
             fetch(SERVER_URL, {
                 method: 'POST',
                 body: JSON.stringify({
                     name: name,
                     sector: sector,
-                    summary: `Panen:${tasks.harvest}, Cut:${tasks.cutting}, Cangkul:${tasks.hoeing}`,
+                    summary: summaryText,
                     wage: wage,
                     time: new Date().toLocaleTimeString()
                 })
             })
             .then(response => {
                 if(response.ok) {
-                    alert(`✅ SUKSES! Data ${name} sudah terkirim ke Laptop Owner.`);
+                    alert(`✅ SUKSES! Data ${name} terkirim ke Owner.`);
                     location.reload();
-                } else {
-                    throw new Error("Server error");
-                }
+                } else { throw new Error("Gagal"); }
             })
             .catch(err => {
-                alert("Gagal konek. Pastikan ada kuota internet.");
+                alert("Gagal konek internet.");
                 btn.innerHTML = "Coba Lagi";
                 btn.disabled = false;
             });
