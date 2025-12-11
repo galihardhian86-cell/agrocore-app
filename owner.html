@@ -6,6 +6,7 @@
     <title>AgroCore - Owner Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* CSS TETAP SAMA PERSIS 100% */
         :root { --primary: #0f172a; --accent: #10b981; --bg: #f1f5f9; --white: #ffffff; --text: #334155; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: var(--bg); display: flex; height: 100vh; overflow: hidden; color: var(--text); }
@@ -37,6 +38,8 @@
         .badge { padding: 5px 10px; border-radius: 15px; font-size: 0.8em; font-weight: bold; background: #dcfce7; color: #166534; }
         .btn-view { background: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.9em; }
         .btn-clear { background: #ef4444; color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.8em; margin-left: 10px; }
+        .btn-acc { background: #10b981; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+        .btn-reject { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-left: 5px; }
         .map-container { position: relative; height: 400px; background-color: #e5e7eb; border-radius: 12px; overflow: hidden; background-image: radial-gradient(#9ca3af 1px, transparent 1px); background-size: 20px 20px; }
         .sector-zone { position: absolute; border: 2px dashed rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 2em; color: rgba(0,0,0,0.1); }
         .worker-dot { position: absolute; width: 40px; height: 40px; background: var(--accent); border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2em; box-shadow: 0 4px 6px rgba(0,0,0,0.2); z-index: 10; cursor: pointer; }
@@ -52,6 +55,7 @@
     <div class="sidebar">
         <div class="brand"><i class="fa-solid fa-building-wheat"></i> AgroCore Owner</div>
         <div class="menu-item active" onclick="showPage('dashboard', this)"><i class="fa-solid fa-chart-pie"></i> Dashboard</div>
+        <div class="menu-item" onclick="showPage('recruitment', this)"><i class="fa-solid fa-users-viewfinder"></i> Rekrutmen</div>
         <div class="menu-item" onclick="showPage('map', this)"><i class="fa-solid fa-map-location-dot"></i> Peta & GPS</div>
         <div class="menu-item" onclick="showPage('cctv', this)"><i class="fa-solid fa-video"></i> Monitoring CCTV</div>
         <div class="menu-item" onclick="showPage('finance', this)"><i class="fa-solid fa-wallet"></i> Keuangan</div>
@@ -62,43 +66,43 @@
         <div class="top-bar">
             <h2 id="page-title">Dashboard Perkebunan</h2>
             <div style="text-align: right; display:flex; align-items:center;">
-                <span id="connection-status" class="loading">● Menghubungkan...</span>
+                <span id="connection-status" class="loading">● Menghubungkan Stream...</span>
                 <div style="font-weight: bold;">Pemilik: Bpk. Wijaya</div>
             </div>
         </div>
 
         <div id="dashboard" class="page-section active">
-            <div class="stats-grid" style="grid-template-columns: 1fr 1fr 1fr;">
-                <div class="stat-card" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white;">
-                    <div style="font-size: 2em;"><i class="fa-solid fa-cloud-sun"></i></div>
-                    <div><h4>Cuaca Lahan</h4><h2>Cerah, 29°C</h2></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon" style="color: green;"><i class="fa-solid fa-leaf"></i></div>
-                    <div><h4>Prediksi Panen</h4><h2>Sektor A: 2 Hari</h2></div>
-                </div>
-                 <div class="stat-card">
-                    <div class="stat-icon" style="color: orange;"><i class="fa-solid fa-trowel"></i></div>
-                    <div><h4>Perawatan</h4><h2>Sektor B: Pupuk</h2></div>
-                </div>
+            <div class="stats-grid">
+                <div class="stat-card"><h3><i class="fa-solid fa-cloud-sun"></i> Cuaca: Cerah</h3></div>
+                <div class="stat-card"><h3><i class="fa-solid fa-leaf"></i> Panen: 2 Hari</h3></div>
             </div>
 
             <div class="table-card">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h3>Laporan Aktivitas (Real-time Cloud)</h3>
+                    <h3>Laporan Aktivitas (LIVE)</h3>
                     <button class="btn-clear" onclick="clearHistory()"><i class="fa-solid fa-trash"></i> Hapus Riwayat</button>
                 </div>
                 <table style="width:100%">
-                    <thead><tr><th>Waktu</th><th>Nama</th><th>Sektor</th><th>Detail Pekerjaan</th><th>Upah</th><th>Bukti Foto</th></tr></thead>
+                    <thead><tr><th>Waktu</th><th>Nama</th><th>Sektor</th><th>Detail</th><th>Upah</th><th>Bukti</th></tr></thead>
                     <tbody id="live-table-body"></tbody>
                 </table>
-                <p id="empty-msg" style="text-align:center; color:gray; padding:20px;">Menunggu data dari Buruh...</p>
+                <p id="empty-msg" style="text-align:center; color:gray; padding:20px;">Menunggu data live...</p>
+            </div>
+        </div>
+
+        <div id="recruitment" class="page-section">
+            <div class="table-card">
+                <h3><i class="fa-solid fa-user-plus"></i> Pelamar Masuk</h3>
+                <table style="width:100%">
+                    <thead><tr><th>Waktu</th><th>Nama</th><th>Umur</th><th>No. HP</th><th>Foto</th><th>Aksi</th></tr></thead>
+                    <tbody id="recruit-table-body"></tbody>
+                </table>
             </div>
         </div>
 
         <div id="map" class="page-section">
             <div class="table-card">
-                <h3><i class="fa-solid fa-satellite"></i> Pelacakan GPS Buruh</h3>
+                <h3>Pelacakan GPS</h3>
                 <div class="map-container" id="farm-map">
                     <div class="sector-zone" style="top:0; left:0; width:50%; height:100%; background:rgba(16, 185, 129, 0.1);">SEKTOR A</div>
                     <div class="sector-zone" style="top:0; right:0; width:50%; height:50%; background:rgba(59, 130, 246, 0.1);">SEKTOR B</div>
@@ -109,7 +113,7 @@
 
         <div id="cctv" class="page-section">
              <div class="table-card">
-                <h3><i class="fa-solid fa-video"></i> CCTV Monitoring (Live Feed)</h3>
+                <h3>CCTV Monitoring</h3>
                 <div class="cctv-grid">
                     <div class="cctv-frame"><img src="https://loremflickr.com/400/300/farmer,field?random=1"><div class="cctv-overlay">REC •</div><div class="cctv-label">CAM 01 - UTARA</div></div>
                     <div class="cctv-frame"><img src="https://loremflickr.com/400/300/gardening,worker?random=2"><div class="cctv-overlay">REC •</div><div class="cctv-label">CAM 02 - SELATAN</div></div>
@@ -121,31 +125,14 @@
 
         <div id="finance" class="page-section">
             <div class="table-card">
-                <h3><i class="fa-solid fa-chart-line"></i> Arus Kas</h3>
-                <div style="padding: 15px 0; border-bottom: 1px dashed #ccc;">
-                    <span>Pengeluaran Gaji Real-time</span>
-                    <span style="float:right; color: red; font-weight:bold;" id="finance-wage">- Rp 0</span>
-                </div>
-                <div style="padding: 15px 0; border-bottom: 1px dashed #ccc;">
-                    <span>Pemasukan Penjualan</span>
-                    <span style="float:right; color: green; font-weight:bold;">+ Rp 65.000.000</span>
-                </div>
+                <h3>Keuangan</h3>
+                <div style="padding:15px 0;">Pengeluaran Gaji: <span style="float:right; color:red; font-weight:bold;" id="finance-wage">- Rp 0</span></div>
             </div>
         </div>
 
         <div id="report" class="page-section">
             <div class="table-card">
-                <h3><i class="fa-solid fa-sack-dollar"></i> Riwayat Penjualan</h3>
-                <table style="width:100%">
-                    <thead><tr><th>Periode</th><th>Komoditas</th><th>Berat</th><th>Pendapatan</th></tr></thead>
-                    <tbody>
-                        <tr><td>Minggu Lalu</td><td>Tomat Merah</td><td>1.0 Ton</td><td style="color:green;">+ Rp 20.000.000</td></tr>
-                        <tr><td>Minggu Lalu</td><td>Cabai Rawit</td><td>500 Kg</td><td style="color:green;">+ Rp 45.000.000</td></tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="table-card" style="margin-top:20px;">
-                <h3><i class="fa-solid fa-list"></i> Log Harian Buruh</h3>
+                <h3>Laporan</h3>
                 <table style="width:100%"><tbody id="history-table-body"></tbody></table>
             </div>
         </div>
@@ -153,7 +140,7 @@
 
     <div class="modal" id="modal-proof">
         <div class="modal-content">
-            <h3>Bukti Foto Lapangan</h3>
+            <h3>Bukti Foto</h3>
             <p id="proof-name" style="font-weight:bold; color:var(--primary);"></p>
             <img id="proof-img" src="" alt="Menunggu Foto...">
             <br>
@@ -162,112 +149,155 @@
     </div>
 
     <script>
-        // === SERVER CONFIG (WAJIB SAMA) ===
-        const SERVER_URL = "https://ntfy.sh/agrocore_live_2025/json?poll=1&since=all";
+        const SERVER_TOPIC = "agrocore_live_2025"; 
+        // Menggunakan /sse agar STREAMING (tidak refresh)
+        const SSE_URL = `https://ntfy.sh/${SERVER_TOPIC}/sse?since=all`;
 
         function formatRupiah(num) {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
         }
 
-        // Logic Clear History
         let lastClearTime = localStorage.getItem('lastClearTime') || 0;
         let allReports = [];
+        let allApplicants = [];
+        let totalWage = 0;
 
-        function fetchData() {
-            fetch(SERVER_URL)
-            .then(res => res.text())
-            .then(text => {
-                const lines = text.trim().split('\n');
-                document.getElementById('connection-status').innerText = "● Terhubung (Online)";
+        // FUNGSI UTAMA: MENGGUNAKAN EVENT SOURCE (STREAMING)
+        // Fungsi ini akan "diam" menunggu data, bukan me-refresh
+        function setupStream() {
+            const eventSource = new EventSource(SSE_URL);
 
-                const tbody = document.getElementById('live-table-body');
-                const tbodyHistory = document.getElementById('history-table-body');
-                const mapContainer = document.getElementById('farm-map');
-                const emptyMsg = document.getElementById('empty-msg');
+            eventSource.onopen = () => {
+                document.getElementById('connection-status').innerText = "● LIVE (Real-time)";
+                document.getElementById('connection-status').style.color = "#10b981"; // Hijau
+                document.getElementById('connection-status').classList.remove('loading');
+            };
 
-                tbody.innerHTML = '';
-                tbodyHistory.innerHTML = '';
-                document.querySelectorAll('.worker-dot').forEach(d => d.remove());
-                
-                allReports = [];
-                let totalWage = 0;
-
-                lines.forEach(line => {
-                    if(!line) return;
-                    try {
-                        const msg = JSON.parse(line);
-                        // Filter data berdasarkan waktu clear history
-                        if (msg.event === 'message' && msg.time > lastClearTime) {
-                            const data = JSON.parse(msg.message);
-                            allReports.unshift(data); 
-                            totalWage += data.wage;
-                        }
-                    } catch (e) {}
-                });
-
-                if(allReports.length > 0) {
-                    emptyMsg.style.display = 'none';
-                    document.getElementById('finance-wage').innerText = "- " + formatRupiah(totalWage);
-
-                    allReports.forEach((data, index) => {
-                        // 1. ISI TABEL DASHBOARD
-                        const row = `
-                            <tr>
-                                <td>${data.time}</td>
-                                <td><b>${data.name}</b></td>
-                                <td>${data.sector}</td>
-                                <td>${data.summary}</td>
-                                <td style="font-weight:bold;">${formatRupiah(data.wage)}</td>
-                                <td><button class="btn-view" onclick="showProof(${index})"><i class="fa-solid fa-eye"></i> Cek Foto</button></td>
-                            </tr>
-                        `;
-                        tbody.innerHTML += row;
-                        tbodyHistory.innerHTML += row;
-
-                        // 2. ISI MAP
-                        let top = '50%', left = '50%'; 
-                        const rand = () => Math.floor(Math.random() * 20) - 10; 
-                        if(data.sector === "Sektor A") { top = (40 + rand()) + '%'; left = (20 + rand()) + '%'; }
-                        else if(data.sector === "Sektor B") { top = (20 + rand()) + '%'; left = (70 + rand()) + '%'; }
-                        else if(data.sector === "Sektor C") { top = (70 + rand()) + '%'; left = (70 + rand()) + '%'; }
-
-                        const dot = document.createElement('div');
-                        dot.className = 'worker-dot';
-                        dot.style.top = top; dot.style.left = left;
-                        dot.setAttribute('data-name', data.name);
-                        dot.innerHTML = '<i class="fa-solid fa-user"></i>';
-                        mapContainer.appendChild(dot);
-                    });
-                } else {
-                    emptyMsg.style.display = 'block';
-                    document.getElementById('finance-wage').innerText = "- Rp 0";
+            eventSource.onmessage = (event) => {
+                try {
+                    const msg = JSON.parse(event.data);
+                    
+                    // Filter: Hanya ambil data yang ID waktunya > Waktu Hapus Terakhir
+                    if (msg.event === 'message' && msg.time > lastClearTime) {
+                        const data = JSON.parse(msg.message);
+                        processNewData(data); // Proses data SATU per SATU saat masuk
+                    }
+                } catch (e) {
+                    console.log("Stream ping...");
                 }
-            })
-            .catch(err => { console.log("Waiting data..."); });
+            };
+
+            eventSource.onerror = () => {
+                document.getElementById('connection-status').innerText = "● Reconnecting...";
+                document.getElementById('connection-status').style.color = "orange";
+            };
         }
 
-        // FUNGSI TAMPILKAN FOTO DI MODAL
-        function showProof(index) {
-            const data = allReports[index];
-            document.getElementById('proof-name').innerText = "Bukti Kerja: " + data.name;
+        function processNewData(data) {
+            // Pisahkan tipe data (Laporan vs Pelamar)
+            if(data.type === 'application') {
+                allApplicants.unshift(data);
+                renderApplicants();
+            } else {
+                allReports.unshift(data);
+                totalWage += (data.wage || 0);
+                renderReports();
+            }
+        }
+
+        function renderReports() {
+            const tbody = document.getElementById('live-table-body');
+            const tbodyHistory = document.getElementById('history-table-body');
+            const mapContainer = document.getElementById('farm-map');
+            const emptyMsg = document.getElementById('empty-msg');
+
+            // Reset UI dulu
+            tbody.innerHTML = '';
+            tbodyHistory.innerHTML = '';
+            document.querySelectorAll('.worker-dot').forEach(d => d.remove());
+
+            if(allReports.length > 0) {
+                emptyMsg.style.display = 'none';
+                document.getElementById('finance-wage').innerText = "- " + formatRupiah(totalWage);
+
+                allReports.forEach((data, index) => {
+                    // Render Tabel
+                    const row = `
+                        <tr>
+                            <td>${data.time}</td>
+                            <td><b>${data.name}</b></td>
+                            <td>${data.sector}</td>
+                            <td>${data.summary}</td>
+                            <td style="font-weight:bold;">${formatRupiah(data.wage)}</td>
+                            <td><button class="btn-view" onclick="showProof('report', ${index})">Foto</button></td>
+                        </tr>`;
+                    tbody.innerHTML += row;
+                    tbodyHistory.innerHTML += row;
+
+                    // Render Map
+                    let top='50%', left='50%'; 
+                    const rand = () => Math.floor(Math.random() * 20) - 10;
+                    if(data.sector === "Sektor A") { top=(40+rand())+'%'; left=(20+rand())+'%'; }
+                    else if(data.sector === "Sektor B") { top=(20+rand())+'%'; left=(70+rand())+'%'; }
+                    else if(data.sector === "Sektor C") { top=(70+rand())+'%'; left=(70+rand())+'%'; }
+                    
+                    const dot = document.createElement('div');
+                    dot.className = 'worker-dot'; dot.style.top=top; dot.style.left=left;
+                    dot.setAttribute('data-name', data.name);
+                    dot.innerHTML = '<i class="fa-solid fa-user"></i>';
+                    mapContainer.appendChild(dot);
+                });
+            }
+        }
+
+        function renderApplicants() {
+            const tbody = document.getElementById('recruit-table-body');
+            tbody.innerHTML = '';
+            
+            if(allApplicants.length > 0) {
+                allApplicants.forEach((app, idx) => {
+                    const row = `
+                        <tr>
+                            <td>${app.time}</td>
+                            <td><b>${app.name}</b></td>
+                            <td>${app.age} Thn</td>
+                            <td>${app.phone}</td>
+                            <td><button class="btn-view" onclick="showProof('app', ${idx})">Foto</button></td>
+                            <td>
+                                <button class="btn-acc" onclick="alert('Diterima!')">ACC</button> 
+                                <button class="btn-reject" onclick="alert('Ditolak.')">X</button>
+                            </td>
+                        </tr>`;
+                    tbody.innerHTML += row;
+                });
+            }
+        }
+
+        function showProof(type, index) {
+            let data = (type === 'report') ? allReports[index] : allApplicants[index];
+            document.getElementById('proof-name').innerText = "Data: " + data.name;
             const img = document.getElementById('proof-img');
             
             if(data.image && data.image.startsWith('data:image')) {
                 img.src = data.image;
-            } else {
-                img.src = "";
-                alert("Foto tidak tersedia/gagal dimuat.");
-                return;
-            }
-            document.getElementById('modal-proof').style.display = 'flex';
+                document.getElementById('modal-proof').style.display = 'flex';
+            } else { alert("Foto tidak tersedia."); }
         }
 
-        // FUNGSI CLEAR HISTORY
         function clearHistory() {
-            if(confirm("Hapus semua riwayat laporan dari tampilan ini?")) {
+            if(confirm("Hapus semua riwayat dari layar? (Data akan kembali jika direfresh penuh)")) {
                 lastClearTime = Math.floor(Date.now() / 1000);
                 localStorage.setItem('lastClearTime', lastClearTime);
-                fetchData(); // Refresh tampilan
+                
+                // Kosongkan array lokal
+                allReports = [];
+                allApplicants = [];
+                totalWage = 0;
+                renderReports();
+                renderApplicants();
+                
+                // Reload halaman untuk re-connect stream bersih (opsional)
+                window.location.reload(); 
             }
         }
 
@@ -275,12 +305,12 @@
             document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
             if(element) { document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active')); element.classList.add('active'); }
-            const titles = { 'dashboard': 'Dashboard', 'map': 'Peta & GPS', 'cctv': 'Monitoring CCTV', 'finance': 'Keuangan', 'report': 'Laporan' };
-            document.getElementById('page-title').innerText = titles[pageId];
+            const titles = { 'dashboard': 'Dashboard', 'recruitment': 'Rekrutmen', 'report': 'Laporan' };
+            document.getElementById('page-title').innerText = titles[pageId] || 'Dashboard';
         }
 
-        setInterval(fetchData, 2000); // Cek data tiap 2 detik
-        fetchData();
+        // PANGGIL FUNGSI STREAMING (Sekali saja, tidak perlu setInterval)
+        setupStream();
     </script>
 </body>
 </html>
