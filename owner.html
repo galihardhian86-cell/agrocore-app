@@ -29,18 +29,25 @@
         .cctv-frame { background: black; height: 280px; border-radius: 10px; position: relative; overflow: hidden; border: 2px solid #333; }
         .cctv-frame img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; transition: 0.5s; }
         .cctv-frame:hover img { opacity: 1; transform: scale(1.05); }
-        .cctv-overlay { position: absolute; top: 15px; left: 15px; color: white; background: red; padding: 3px 10px; border-radius: 4px; font-size: 0.8em; animation: blink 1.5s infinite; z-index: 10; font-weight: bold; }
+        .cctv-overlay { position: absolute; top: 15px; left: 15px; color: white; background: red; padding: 3px 10px; border-radius: 4px; font-size: 0.8em; animation: blink 1.5s infinite; z-index: 10; font-weight: bold; box-shadow: 0 0 5px red; }
         .cctv-label { position: absolute; bottom: 15px; left: 15px; color: #0f0; font-family: monospace; background: rgba(0,0,0,0.7); padding: 2px 5px; font-size: 0.9em; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 100; }
-        .modal-content { background: white; width: 500px; max-height: 90vh; overflow-y: auto; border-radius: 15px; padding: 25px; animation: slideUp 0.3s; text-align:center; }
+        .modal-content { background: white; width: 500px; max-height: 90vh; overflow-y: auto; border-radius: 15px; padding: 25px; animation: slideUp 0.3s; text-align: center; }
         #proof-img { width: 100%; border-radius: 8px; border: 2px solid #eee; margin-top: 10px; }
         .badge { padding: 5px 10px; border-radius: 15px; font-size: 0.8em; font-weight: bold; background: #dcfce7; color: #166534; }
+        .bg-pending { background: #fef3c7; color: #b45309; }
+        .bg-paid { background: #dcfce7; color: #166534; }
         .btn-view { background: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.9em; }
         .map-container { position: relative; height: 400px; background-color: #e5e7eb; border-radius: 12px; overflow: hidden; background-image: radial-gradient(#9ca3af 1px, transparent 1px); background-size: 20px 20px; }
         .sector-zone { position: absolute; border: 2px dashed rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 2em; color: rgba(0,0,0,0.1); }
         .worker-dot { position: absolute; width: 40px; height: 40px; background: var(--accent); border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2em; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: 0.5s; z-index: 10; cursor: pointer; }
         .worker-dot:hover::after { content: attr(data-name); position: absolute; top: -30px; background: #333; color: white; padding: 5px; border-radius: 5px; font-size: 0.8em; white-space: nowrap; }
         .loading { color: green; font-weight: bold; animation: blink 1s infinite; font-size: 0.9em; margin-right: 10px;}
+        
+        /* TOMBOL HAPUS BARU */
+        .btn-clear { background: #ef4444; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.8em; margin-left: 10px; }
+        .btn-clear:hover { background: #dc2626; }
+
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes blink { 50% { opacity: 0.5; } }
     </style>
@@ -82,7 +89,11 @@
             </div>
 
             <div class="table-card">
-                <h3>Laporan Aktivitas Harian (Real-time Cloud)</h3>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3>Laporan Aktivitas Harian (Real-time Cloud)</h3>
+                    <button class="btn-clear" onclick="clearHistory()"><i class="fa-solid fa-trash"></i> Hapus Riwayat</button>
+                </div>
+                
                 <table style="width:100%">
                     <thead><tr><th>Waktu</th><th>Nama</th><th>Sektor</th><th>Detail Pekerjaan</th><th>Upah</th><th>Bukti Foto</th></tr></thead>
                     <tbody id="live-table-body"></tbody>
@@ -157,13 +168,15 @@
     </div>
 
     <script>
-        // === SERVER CONFIG (WAJIB SAMA DENGAN BURUH) ===
-        const SERVER_URL = "https://ntfy.sh/agrocore_tugas_akhir_2025/json?poll=1&since=1h";
+        // === SERVER CONFIG ===
+        const SERVER_URL = "https://ntfy.sh/agrocore_final_fix_v100/json?poll=1&since=1h";
 
         function formatRupiah(num) {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
         }
 
+        // Ambil waktu reset terakhir dari memori (agar history lama tidak muncul)
+        let lastClearTime = localStorage.getItem('lastClearTime') || 0;
         let allReports = [];
 
         function fetchData() {
@@ -171,7 +184,6 @@
             .then(res => res.text())
             .then(text => {
                 const lines = text.trim().split('\n');
-                
                 document.getElementById('connection-status').innerText = "● Terhubung (Online)";
 
                 const tbody = document.getElementById('live-table-body');
@@ -190,7 +202,8 @@
                     if(!line) return;
                     try {
                         const msg = JSON.parse(line);
-                        if (msg.event === 'message') {
+                        // FILTER: Hanya ambil data yang lebih baru dari waktu "Hapus Riwayat"
+                        if (msg.event === 'message' && msg.time > lastClearTime) {
                             const data = JSON.parse(msg.message);
                             allReports.unshift(data); 
                             totalWage += data.wage;
@@ -203,7 +216,7 @@
                     document.getElementById('finance-wage').innerText = "- " + formatRupiah(totalWage);
 
                     allReports.forEach((data, index) => {
-                        // 1. UPDATE TABEL UTAMA
+                        // 1. ISI TABEL DASHBOARD
                         tbody.innerHTML += `
                             <tr>
                                 <td>${data.time}</td>
@@ -215,7 +228,7 @@
                             </tr>
                         `;
                         
-                        // 2. UPDATE HISTORY
+                        // 2. ISI TABEL HISTORY
                         tbodyHistory.innerHTML += `
                             <tr>
                                 <td>${data.time}</td>
@@ -224,7 +237,7 @@
                                 <td>${formatRupiah(data.wage)}</td>
                             </tr>`;
 
-                        // 3. UPDATE MAP (GPS SIMULASI)
+                        // 3. ISI PETA GPS
                         let top = '50%', left = '50%'; 
                         const rand = () => Math.floor(Math.random() * 20) - 10; 
                         if(data.sector === "Sektor A") { top = (40 + rand()) + '%'; left = (20 + rand()) + '%'; }
@@ -238,9 +251,25 @@
                         dot.innerHTML = '<i class="fa-solid fa-user"></i>';
                         mapContainer.appendChild(dot);
                     });
+                } else {
+                    emptyMsg.style.display = 'block';
+                    document.getElementById('finance-wage').innerText = "- Rp 0";
                 }
             })
             .catch(err => { console.log("Waiting data..."); });
+        }
+
+        // FUNGSI UNTUK HAPUS RIWAYAT (RESET)
+        function clearHistory() {
+            if(confirm("Yakin ingin menghapus semua riwayat laporan dari tampilan ini?")) {
+                // Set waktu "pemblokiran" ke detik ini
+                lastClearTime = Math.floor(Date.now() / 1000);
+                localStorage.setItem('lastClearTime', lastClearTime);
+                
+                // Refresh data
+                fetchData();
+                alert("Riwayat dibersihkan.");
+            }
         }
 
         // FUNGSI LIHAT FOTO
