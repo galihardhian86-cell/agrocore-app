@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgroCore AI - Worker App (Online)</title>
+    <title>AgroCore AI - Worker App</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { --primary: #10b981; --dark: #1f2937; --light: #f3f4f6; --card-bg: #ffffff; --text-main: #374151; }
@@ -19,7 +19,7 @@
         .btn-photo { background: var(--dark); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
         .salary-amount { font-size: 2.5em; font-weight: bold; color: var(--primary); text-align: center; margin: 10px 0; }
         .btn-kirim { background: var(--primary); color: white; font-weight: bold; padding: 15px 20px; border-radius: 6px; border: none; cursor: pointer; width: 100%; font-size: 1.1em; }
-        .btn-kirim:hover { background: #059669; }
+        .btn-kirim:disabled { background: #ccc; cursor: not-allowed; }
         .proof-count { background: red; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.8em; margin-left: 5px; display: none; }
         @media (max-width: 768px) { body { flex-direction: column; overflow: auto; } .sidebar { width: 100%; } }
     </style>
@@ -37,7 +37,7 @@
                 <option value="Sektor C">Sektor C</option>
             </select>
         </div>
-        <div style="padding:10px; background:rgba(255,255,255,0.1); border-radius:5px;"><i class="fa-solid fa-wifi"></i> Status: ONLINE</div>
+        <div style="padding:10px; background:rgba(255,255,255,0.1); border-radius:5px;"><i class="fa-solid fa-signal"></i> Server: NTFY</div>
     </div>
 
     <div class="main-content">
@@ -75,9 +75,10 @@
     </div>
 
     <script>
-        // === KUNCI RAHASIA AGAR KONEK (JANGAN DIUBAH) ===
-        // Kode ini mengirim data ke Cloud Dweet.io
-        const SERVER_URL = "https://dweet.io/dweet/for/agrocore-project-id-unik-9988";
+        // === SERVER BARU (NTFY) - LEBIH STABIL DI HP INDONESIA ===
+        // Ganti 'agrocore_project_galih_v2' jika ingin channel unik sendiri
+        const TOPIC = "agrocore_project_galih_v2";
+        const SERVER_URL = `https://ntfy.sh/${TOPIC}`;
         
         let tasks = { harvest: 0, cutting: 0, hoeing: 0, fertilizer: 0 };
         const rates = { harvest: 50000, cutting: 30000, hoeing: 50000, fertilizer: 30000 };
@@ -102,31 +103,34 @@
             const sector = document.getElementById('workerSector').value;
             const wage = calcWage();
 
-            if(!name) return alert("⚠️ Isi Nama Buruh dulu di pojok kiri atas!");
-            if(wage === 0) return alert("⚠️ Belum ada pekerjaan yang diinput!");
+            if(!name) return alert("⚠️ Isi Nama Buruh dulu!");
+            if(wage === 0) return alert("⚠️ Belum ada pekerjaan!");
 
             const btn = document.getElementById('btn-submit');
-            btn.innerHTML = "Mengirim ke Awan...";
+            btn.innerHTML = "Mengirim...";
             btn.disabled = true;
 
-            // FUNGSI INI MENGGANTIKAN localStorage
+            // KIRIM KE SERVER NTFY (Biasanya tidak diblokir)
             fetch(SERVER_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     name: name,
                     sector: sector,
-                    summary: `Panen:${tasks.harvest}, Cut:${tasks.cutting}, Cangkul:${tasks.hoeing}, Pupuk:${tasks.fertilizer}`,
+                    summary: `Panen:${tasks.harvest}, Cut:${tasks.cutting}, Cangkul:${tasks.hoeing}`,
                     wage: wage,
                     time: new Date().toLocaleTimeString()
                 })
             })
-            .then(() => {
-                alert(`✅ BERHASIL! Data ${name} sudah masuk ke Laptop Owner.`);
-                location.reload();
+            .then(response => {
+                if(response.ok) {
+                    alert(`✅ SUKSES! Data ${name} sudah terkirim ke Laptop Owner.`);
+                    location.reload();
+                } else {
+                    throw new Error("Server error");
+                }
             })
             .catch(err => {
-                alert("Gagal konek internet.");
+                alert("Gagal konek. Pastikan ada kuota internet.");
                 btn.innerHTML = "Coba Lagi";
                 btn.disabled = false;
             });
